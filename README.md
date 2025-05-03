@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/gongrzhe-office-word-mcp-server-badge.png)](https://mseep.ai/app/gongrzhe-office-word-mcp-server)
+
 # Office-Word-MCP-Server
 
 A Model Context Protocol (MCP) server for creating, reading, and manipulating Microsoft Word documents. This server enables AI assistants to work with Word documents through a standardized interface, providing rich document editing capabilities.
