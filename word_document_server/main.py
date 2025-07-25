@@ -27,7 +27,7 @@ def get_transport_config():
     # Default configuration
     config = {
         'transport': 'stdio',  # Default to stdio for backward compatibility
-        'host': '127.0.0.1',
+        'host': '0.0.0.0',
         'port': 8000,
         'path': '/mcp',
         'sse_path': '/sse'
