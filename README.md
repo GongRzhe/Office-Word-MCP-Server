@@ -4,6 +4,8 @@
 
 A Model Context Protocol (MCP) server for creating, reading, and manipulating Microsoft Word documents. This server enables AI assistants to work with Word documents through a standardized interface, providing rich document editing capabilities.
 
+[![MCPHub.com Badge](https://mcphub.com/api/mcp-servers/gongrzhe/office-word-mcp-server/badge)](https://mcphub.com/mcp-servers/gongrzhe/office-word-mcp-server)
+
 <a href="https://glama.ai/mcp/servers/@GongRzhe/Office-Word-MCP-Server">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@GongRzhe/Office-Word-MCP-Server/badge" alt="Office Word Server MCP server" />
 </a>
