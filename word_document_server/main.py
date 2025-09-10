@@ -6,6 +6,11 @@ Supports multiple transports: stdio, sse, and streamable-http using standalone F
 
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+print("Loading configuration from .env file...")
+load_dotenv()
 # Set required environment variable for FastMCP 2.8.1+
 os.environ.setdefault('FASTMCP_LOG_LEVEL', 'INFO')
 from fastmcp import FastMCP

@@ -2,3 +2,4 @@ fastmcp
 python-docx
 msoffcrypto-tool
 docx2pdf
+python-dotenv
