@@ -17,7 +17,7 @@ from word_document_server.core.comments import (
 )
 
 
-async def get_all_comments(filename: str) -> str:
+def get_all_comments(filename: str) -> str:
     """
     Extract all comments from a Word document.
     
@@ -56,7 +56,7 @@ async def get_all_comments(filename: str) -> str:
         }, indent=2)
 
 
-async def get_comments_by_author(filename: str, author: str) -> str:
+def get_comments_by_author(filename: str, author: str) -> str:
     """
     Extract comments from a specific author in a Word document.
     
@@ -106,7 +106,7 @@ async def get_comments_by_author(filename: str, author: str) -> str:
         }, indent=2)
 
 
-async def get_comments_for_paragraph(filename: str, paragraph_index: int) -> str:
+def get_comments_for_paragraph(filename: str, paragraph_index: int) -> str:
     """
     Extract comments for a specific paragraph in a Word document.
     

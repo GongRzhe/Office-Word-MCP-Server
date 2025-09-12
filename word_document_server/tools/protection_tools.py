@@ -23,7 +23,7 @@ from word_document_server.core.protection import (
 )
 
 
-async def protect_document(filename: str, password: str) -> str:
+def protect_document(filename: str, password: str) -> str:
     """Add password protection to a Word document.
 
     Args:
@@ -79,7 +79,7 @@ async def protect_document(filename: str, password: str) -> str:
              return f"Failed to encrypt document {filename}: {str(e)}. Also failed to restore original file: {str(restore_e)}"
 
 
-async def add_restricted_editing(filename: str, password: str, editable_sections: List[str]) -> str:
+def add_restricted_editing(filename: str, password: str, editable_sections: List[str]) -> str:
     """Add restricted editing to a Word document, allowing editing only in specified sections.
 
     Args:
@@ -119,7 +119,7 @@ async def add_restricted_editing(filename: str, password: str, editable_sections
     except Exception as e:
         return f"Failed to add restricted editing: {str(e)}"
 
-async def add_digital_signature(filename: str, signer_name: str, reason: Optional[str] = None) -> str:
+def add_digital_signature(filename: str, signer_name: str, reason: Optional[str] = None) -> str:
     """Add a digital signature to a Word document.
 
     Args:
@@ -170,7 +170,7 @@ async def add_digital_signature(filename: str, signer_name: str, reason: Optiona
     except Exception as e:
         return f"Failed to add digital signature: {str(e)}"
 
-async def verify_document(filename: str, password: Optional[str] = None) -> str:
+def verify_document(filename: str, password: Optional[str] = None) -> str:
     """Verify document protection and/or digital signature.
 
     Args:
@@ -222,7 +222,7 @@ async def verify_document(filename: str, password: Optional[str] = None) -> str:
     except Exception as e:
         return f"Failed to verify document: {str(e)}"
 
-async def unprotect_document(filename: str, password: str) -> str:
+def unprotect_document(filename: str, password: str) -> str:
     """Remove password protection from a Word document.
 
     Args:

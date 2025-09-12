@@ -10,11 +10,11 @@ from docx import Document
 from docx.shared import Inches, Pt
 
 from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension
-from word_document_server.utils.document_utils import find_and_replace_text, insert_header_near_text, insert_numbered_list_near_text, insert_line_or_paragraph_near_text, replace_paragraph_block_below_header, replace_block_between_manual_anchors
+from word_document_server.utils.document_utils import find_and_replace_text, find_and_replace_text_preserve_formatting, insert_header_near_text, insert_numbered_list_near_text, insert_line_or_paragraph_near_text, replace_paragraph_block_below_header, replace_block_between_manual_anchors
 from word_document_server.core.styles import ensure_heading_style, ensure_table_style
 
 
-async def add_heading(filename: str, text: str, level: int = 1) -> str:
+def add_heading(filename: str, text: str, level: int = 1) -> str:
     """Add a heading to a Word document.
     
     Args:
@@ -74,7 +74,7 @@ async def add_heading(filename: str, text: str, level: int = 1) -> str:
         return f"Failed to add heading: {str(e)}"
 
 
-async def add_paragraph(filename: str, text: str, style: Optional[str] = None) -> str:
+def add_paragraph(filename: str, text: str, style: Optional[str] = None) -> str:
     """Add a paragraph to a Word document.
     
     Args:
@@ -112,7 +112,7 @@ async def add_paragraph(filename: str, text: str, style: Optional[str] = None) -
         return f"Failed to add paragraph: {str(e)}"
 
 
-async def add_table(filename: str, rows: int, cols: int, data: Optional[List[List[str]]] = None) -> str:
+def add_table(filename: str, rows: int, cols: int, data: Optional[List[List[str]]] = None) -> str:
     """Add a table to a Word document.
     
     Args:
@@ -159,7 +159,7 @@ async def add_table(filename: str, rows: int, cols: int, data: Optional[List[Lis
         return f"Failed to add table: {str(e)}"
 
 
-async def add_picture(filename: str, image_path: str, width: Optional[float] = None) -> str:
+def add_picture(filename: str, image_path: str, width: Optional[float] = None) -> str:
     """Add an image to a Word document.
     
     Args:
@@ -218,7 +218,7 @@ async def add_picture(filename: str, image_path: str, width: Optional[float] = N
         return f"Document processing error: {error_type} - {error_msg or 'No error details available'}"
 
 
-async def add_page_break(filename: str) -> str:
+def add_page_break(filename: str) -> str:
     """Add a page break to the document.
     
     Args:
@@ -243,7 +243,7 @@ async def add_page_break(filename: str) -> str:
         return f"Failed to add page break: {str(e)}"
 
 
-async def add_table_of_contents(filename: str, title: str = "Table of Contents", max_level: int = 3) -> str:
+def add_table_of_contents(filename: str, title: str = "Table of Contents", max_level: int = 3) -> str:
     """Add a table of contents to a Word document based on heading styles.
     
     Args:
@@ -332,7 +332,7 @@ async def add_table_of_contents(filename: str, title: str = "Table of Contents",
         return f"Failed to add table of contents: {str(e)}"
 
 
-async def delete_paragraph(filename: str, paragraph_index: int) -> str:
+def delete_paragraph(filename: str, paragraph_index: int) -> str:
     """Delete a paragraph from a document.
     
     Args:
@@ -368,7 +368,7 @@ async def delete_paragraph(filename: str, paragraph_index: int) -> str:
         return f"Failed to delete paragraph: {str(e)}"
 
 
-async def search_and_replace(filename: str, find_text: str, replace_text: str) -> str:
+def search_and_replace(filename: str, find_text: str, replace_text: str) -> str:
     """Search for text and replace all occurrences.
     
     Args:
@@ -389,8 +389,8 @@ async def search_and_replace(filename: str, find_text: str, replace_text: str) -
     try:
         doc = Document(filename)
         
-        # Perform find and replace
-        count = find_and_replace_text(doc, find_text, replace_text)
+        # Perform find and replace with formatting preservation
+        count = find_and_replace_text_preserve_formatting(doc, find_text, replace_text)
         
         if count > 0:
             doc.save(filename)
@@ -400,22 +400,22 @@ async def search_and_replace(filename: str, find_text: str, replace_text: str) -
     except Exception as e:
         return f"Failed to search and replace: {str(e)}"
 
-async def insert_header_near_text_tool(filename: str, target_text: str = None, header_title: str = "", position: str = 'after', header_style: str = 'Heading 1', target_paragraph_index: int = None) -> str:
+def insert_header_near_text_tool(filename: str, target_text: str = None, header_title: str = "", position: str = 'after', header_style: str = 'Heading 1', target_paragraph_index: int = None) -> str:
     """Insert a header (with specified style) before or after the target paragraph. Specify by text or paragraph index."""
     return insert_header_near_text(filename, target_text, header_title, position, header_style, target_paragraph_index)
 
-async def insert_numbered_list_near_text_tool(filename: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None) -> str:
+def insert_numbered_list_near_text_tool(filename: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None) -> str:
     """Insert a numbered list before or after the target paragraph. Specify by text or paragraph index."""
     return insert_numbered_list_near_text(filename, target_text, list_items, position, target_paragraph_index)
 
-async def insert_line_or_paragraph_near_text_tool(filename: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None) -> str:
+def insert_line_or_paragraph_near_text_tool(filename: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None) -> str:
     """Insert a new line or paragraph (with specified or matched style) before or after the target paragraph. Specify by text or paragraph index."""
     return insert_line_or_paragraph_near_text(filename, target_text, line_text, position, line_style, target_paragraph_index)
 
-async def replace_paragraph_block_below_header_tool(filename: str, header_text: str, new_paragraphs: list, detect_block_end_fn=None) -> str:
+def replace_paragraph_block_below_header_tool(filename: str, header_text: str, new_paragraphs: list, detect_block_end_fn=None) -> str:
     """Reemplaza el bloque de párrafos debajo de un encabezado, evitando modificar TOC."""
     return replace_paragraph_block_below_header(filename, header_text, new_paragraphs, detect_block_end_fn)
 
-async def replace_block_between_manual_anchors_tool(filename: str, start_anchor_text: str, new_paragraphs: list, end_anchor_text: str = None, match_fn=None, new_paragraph_style: str = None) -> str:
+def replace_block_between_manual_anchors_tool(filename: str, start_anchor_text: str, new_paragraphs: list, end_anchor_text: str = None, match_fn=None, new_paragraph_style: str = None) -> str:
     """Replace all content between start_anchor_text and end_anchor_text (or next logical header if not provided)."""
     return replace_block_between_manual_anchors(filename, start_anchor_text, new_paragraphs, end_anchor_text, match_fn, new_paragraph_style)

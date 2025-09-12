@@ -7,6 +7,7 @@ Supports multiple transports: stdio, sse, and streamable-http using standalone F
 import os
 import sys
 from dotenv import load_dotenv
+from typing import List, Dict, Any, Optional
 
 # Load environment variables from .env file
 print("Loading configuration from .env file...")
@@ -89,6 +90,79 @@ mcp = FastMCP("Word Document Server")
 def register_tools():
     """Register all tools with the MCP server using FastMCP decorators."""
     
+    # ChatGPT compatibility helpers
+    @mcp.tool()
+    async def search(query: str, directory: str = ".") -> List[Dict[str, Any]]:
+        """Search for documents by keyword (filename match). Returns a list of matches.
+        Each result contains an `id` field that can be passed to the `fetch` tool.
+        - query: case-insensitive substring to match against filenames
+        - directory: base directory to search (non-recursive)
+        """
+        if not query:
+            return []
+        try:
+            q = query.lower()
+            results: List[Dict[str, Any]] = []
+            if not os.path.exists(directory):
+                return []
+            for name in os.listdir(directory):
+                path = os.path.join(directory, name)
+                if os.path.isfile(path) and name.lower().endswith(".docx"):
+                    if q in name.lower():
+                        results.append({
+                            "id": path,              # required by ChatGPT fetch action
+                            "path": path,
+                            "title": os.path.splitext(name)[0]
+                        })
+            return results
+        except Exception:
+            return []
+
+    @mcp.tool()
+    async def fetch(id: str) -> Dict[str, Any]:
+        """Fetch the content for a search result by `id`.
+        For this server, `id` is the absolute file path. For `.docx`, returns extracted text.
+        Returns: { id, path, mime, content }
+        """
+        path = id
+        if not path:
+            return {"id": id, "path": path, "mime": "text/plain", "content": ""}
+        try:
+            if not os.path.exists(path):
+                return {"id": id, "path": path, "mime": "text/plain", "content": ""}
+            if path.lower().endswith(".docx"):
+                text = document_tools.get_document_text(path)
+                return {"id": id, "path": path, "mime": "text/plain", "content": text}
+            # Fallback: try read as text
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    return {"id": id, "path": path, "mime": "text/plain", "content": f.read()}
+            except Exception:
+                # As a last resort, indicate binary content omitted
+                return {"id": id, "path": path, "mime": "application/octet-stream", "content": "<binary omitted>"}
+        except Exception:
+            return {"id": id, "path": path, "mime": "text/plain", "content": ""}
+
+    @mcp.tool()
+    async def list_resources(directory: str = ".") -> List[Dict[str, Any]]:
+        """List available resources for MCP compliance (documents as file URIs)."""
+        resources: List[Dict[str, Any]] = []
+        try:
+            if not os.path.exists(directory):
+                return resources
+            for name in os.listdir(directory):
+                path = os.path.join(directory, name)
+                if os.path.isfile(path) and name.lower().endswith(".docx"):
+                    resources.append({
+                        "uri": f"file://{os.path.abspath(path)}",
+                        "name": name,
+                        "description": f"Word document: {name}",
+                        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    })
+            return resources
+        except Exception:
+            return resources
+
     # Document tools (create, copy, info, etc.)
     @mcp.tool()
     def create_document(filename: str, title: str = None, author: str = None):
@@ -138,7 +212,7 @@ def register_tools():
         return content_tools.insert_line_or_paragraph_near_text_tool(filename, target_text, line_text, position, line_style, target_paragraph_index)
     
     @mcp.tool()
-    def insert_numbered_list_near_text(filename: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None):
+    def insert_numbered_list_near_text(filename: str, target_text: Optional[str] = None, list_items: Optional[List[str]] = None, position: str = 'after', target_paragraph_index: Optional[int] = None):
         """Insert a numbered list before or after the target paragraph. Specify by text or paragraph index. Args: filename (str), target_text (str, optional), list_items (list of str), position ('before' or 'after'), target_paragraph_index (int, optional)."""
         return content_tools.insert_numbered_list_near_text_tool(filename, target_text, list_items, position, target_paragraph_index)
     # Content tools (paragraphs, headings, tables, etc.)
@@ -158,7 +232,7 @@ def register_tools():
         return content_tools.add_picture(filename, image_path, width)
     
     @mcp.tool()
-    def add_table(filename: str, rows: int, cols: int, data: list = None):
+    def add_table(filename: str, rows: int, cols: int, data: Optional[List[List[str]]] = None):
         """Add a table to a Word document."""
         return content_tools.add_table(filename, rows, cols, data)
     
@@ -199,8 +273,8 @@ def register_tools():
         )
     
     @mcp.tool()
-    def format_table(filename: str, table_index: int, has_header_row: bool = None,
-                    border_style: str = None, shading: list = None):
+    def format_table(filename: str, table_index: int, has_header_row: Optional[bool] = None,
+                    border_style: Optional[str] = None, shading: Optional[List[str]] = None):
         """Format a table with borders, shading, and structure."""
         return format_tools.format_table(filename, table_index, has_header_row, border_style, shading)
     
@@ -363,12 +437,12 @@ def register_tools():
         return extended_document_tools.convert_to_pdf(filename, output_filename)
 
     @mcp.tool()
-    def replace_paragraph_block_below_header(filename: str, header_text: str, new_paragraphs: list, detect_block_end_fn=None):
+    def replace_paragraph_block_below_header(filename: str, header_text: str, new_paragraphs: List[str], detect_block_end_fn=None):
         """Reemplaza el bloque de párrafos debajo de un encabezado, evitando modificar TOC."""
         return replace_paragraph_block_below_header_tool(filename, header_text, new_paragraphs, detect_block_end_fn)
 
     @mcp.tool()
-    def replace_block_between_manual_anchors(filename: str, start_anchor_text: str, new_paragraphs: list, end_anchor_text: str = None, match_fn=None, new_paragraph_style: str = None):
+    def replace_block_between_manual_anchors(filename: str, start_anchor_text: str, new_paragraphs: List[str], end_anchor_text: Optional[str] = None, match_fn=None, new_paragraph_style: Optional[str] = None):
         """Replace all content between start_anchor_text and end_anchor_text (or next logical header if not provided)."""
         return replace_block_between_manual_anchors_tool(filename, start_anchor_text, new_paragraphs, end_anchor_text, match_fn, new_paragraph_style)
 
@@ -395,7 +469,7 @@ def register_tools():
         return format_tools.set_table_column_width(filename, table_index, col_index, width, width_type)
 
     @mcp.tool()
-    def set_table_column_widths(filename: str, table_index: int, widths: list, 
+    def set_table_column_widths(filename: str, table_index: int, widths: List[float], 
                                width_type: str = "points"):
         """Set the widths of multiple table columns."""
         return format_tools.set_table_column_widths(filename, table_index, widths, width_type)

@@ -26,7 +26,7 @@ from word_document_server.core.footnotes import (
 )
 
 
-async def add_footnote_to_document(filename: str, paragraph_index: int, footnote_text: str) -> str:
+def add_footnote_to_document(filename: str, paragraph_index: int, footnote_text: str) -> str:
     """Add a footnote to a specific paragraph in a Word document.
     
     Args:
@@ -96,7 +96,7 @@ async def add_footnote_to_document(filename: str, paragraph_index: int, footnote
         return f"Failed to add footnote: {str(e)}"
 
 
-async def add_endnote_to_document(filename: str, paragraph_index: int, endnote_text: str) -> str:
+def add_endnote_to_document(filename: str, paragraph_index: int, endnote_text: str) -> str:
     """Add an endnote to a specific paragraph in a Word document.
     
     Args:
@@ -156,7 +156,7 @@ async def add_endnote_to_document(filename: str, paragraph_index: int, endnote_t
         return f"Failed to add endnote: {str(e)}"
 
 
-async def convert_footnotes_to_endnotes_in_document(filename: str) -> str:
+def convert_footnotes_to_endnotes_in_document(filename: str) -> str:
     """Convert all footnotes to endnotes in a Word document.
     
     Args:
@@ -240,7 +240,7 @@ async def convert_footnotes_to_endnotes_in_document(filename: str) -> str:
         return f"Failed to convert footnotes to endnotes: {str(e)}"
 
 
-async def add_footnote_after_text(filename: str, search_text: str, footnote_text: str, 
+def add_footnote_after_text(filename: str, search_text: str, footnote_text: str, 
                                  output_filename: Optional[str] = None) -> str:
     """Add a footnote after specific text in a Word document with proper formatting.
     
@@ -277,7 +277,7 @@ async def add_footnote_after_text(filename: str, search_text: str, footnote_text
         return f"Failed to add footnote: {str(e)}"
 
 
-async def add_footnote_before_text(filename: str, search_text: str, footnote_text: str, 
+def add_footnote_before_text(filename: str, search_text: str, footnote_text: str, 
                                   output_filename: Optional[str] = None) -> str:
     """Add a footnote before specific text in a Word document with proper formatting.
     
@@ -314,7 +314,7 @@ async def add_footnote_before_text(filename: str, search_text: str, footnote_tex
         return f"Failed to add footnote: {str(e)}"
 
 
-async def add_footnote_enhanced(filename: str, paragraph_index: int, footnote_text: str,
+def add_footnote_enhanced(filename: str, paragraph_index: int, footnote_text: str,
                                output_filename: Optional[str] = None) -> str:
     """Enhanced version of add_footnote_to_document with proper superscript formatting.
     
@@ -356,7 +356,7 @@ async def add_footnote_enhanced(filename: str, paragraph_index: int, footnote_te
         return f"Failed to add footnote: {str(e)}"
 
 
-async def customize_footnote_style(filename: str, numbering_format: str = "1, 2, 3", 
+def customize_footnote_style(filename: str, numbering_format: str = "1, 2, 3", 
                                   start_number: int = 1, font_name: Optional[str] = None,
                                   font_size: Optional[int] = None) -> str:
     """Customize footnote numbering and formatting in a Word document.
@@ -415,7 +415,7 @@ async def customize_footnote_style(filename: str, numbering_format: str = "1, 2,
         return f"Failed to customize footnote style: {str(e)}"
 
 
-async def delete_footnote_from_document(filename: str, footnote_id: Optional[int] = None,
+def delete_footnote_from_document(filename: str, footnote_id: Optional[int] = None,
                                        search_text: Optional[str] = None, 
                                        output_filename: Optional[str] = None) -> str:
     """Delete a footnote from a Word document.
@@ -459,7 +459,7 @@ async def delete_footnote_from_document(filename: str, footnote_id: Optional[int
 # ============================================================================
 
 
-async def add_footnote_robust_tool(
+def add_footnote_robust_tool(
     filename: str,
     search_text: Optional[str] = None,
     paragraph_index: Optional[int] = None,
@@ -522,7 +522,7 @@ async def add_footnote_robust_tool(
     }
 
 
-async def delete_footnote_robust_tool(
+def delete_footnote_robust_tool(
     filename: str,
     footnote_id: Optional[int] = None,
     search_text: Optional[str] = None,
@@ -577,7 +577,7 @@ async def delete_footnote_robust_tool(
     }
 
 
-async def validate_footnotes_tool(filename: str) -> Dict[str, Any]:
+def validate_footnotes_tool(filename: str) -> Dict[str, Any]:
     """
     Validate all footnotes in a document.
     
@@ -617,7 +617,7 @@ async def validate_footnotes_tool(filename: str) -> Dict[str, Any]:
 # Compatibility wrappers for robust tools (maintain backward compatibility)
 # ============================================================================
 
-async def add_footnote_to_document_robust(
+def add_footnote_to_document_robust(
     filename: str, 
     paragraph_index: int, 
     footnote_text: str
@@ -626,7 +626,7 @@ async def add_footnote_to_document_robust(
     Robust version of add_footnote_to_document.
     Maintains backward compatibility with existing API.
     """
-    result = await add_footnote_robust_tool(
+    result = add_footnote_robust_tool(
         filename=filename,
         paragraph_index=paragraph_index,
         footnote_text=footnote_text
@@ -634,7 +634,7 @@ async def add_footnote_to_document_robust(
     return result["message"]
 
 
-async def add_footnote_after_text_robust(
+def add_footnote_after_text_robust(
     filename: str,
     search_text: str,
     footnote_text: str,
@@ -651,7 +651,7 @@ async def add_footnote_after_text_robust(
         shutil.copy2(filename, output_filename)
         working_file = output_filename
     
-    result = await add_footnote_robust_tool(
+    result = add_footnote_robust_tool(
         filename=working_file,
         search_text=search_text,
         footnote_text=footnote_text
@@ -659,7 +659,7 @@ async def add_footnote_after_text_robust(
     return result["message"]
 
 
-async def add_footnote_before_text_robust(
+def add_footnote_before_text_robust(
     filename: str,
     search_text: str,
     footnote_text: str,
@@ -676,7 +676,7 @@ async def add_footnote_before_text_robust(
         shutil.copy2(filename, output_filename)
         working_file = output_filename
     
-    result = await add_footnote_robust_tool(
+    result = add_footnote_robust_tool(
         filename=working_file,
         search_text=search_text,
         footnote_text=footnote_text
@@ -684,7 +684,7 @@ async def add_footnote_before_text_robust(
     return result["message"]
 
 
-async def delete_footnote_from_document_robust(
+def delete_footnote_from_document_robust(
     filename: str,
     footnote_id: Optional[int] = None,
     search_text: Optional[str] = None,
@@ -701,7 +701,7 @@ async def delete_footnote_from_document_robust(
         shutil.copy2(filename, output_filename)
         working_file = output_filename
     
-    result = await delete_footnote_robust_tool(
+    result = delete_footnote_robust_tool(
         filename=working_file,
         footnote_id=footnote_id,
         search_text=search_text

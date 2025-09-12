@@ -22,7 +22,7 @@ from word_document_server.core.tables import (
 )
 
 
-async def format_text(filename: str, paragraph_index: int, start_pos: int, end_pos: int, 
+def format_text(filename: str, paragraph_index: int, start_pos: int, end_pos: int, 
                      bold: Optional[bool] = None, italic: Optional[bool] = None, 
                      underline: Optional[bool] = None, color: Optional[str] = None,
                      font_size: Optional[int] = None, font_name: Optional[str] = None) -> str:
@@ -132,7 +132,7 @@ async def format_text(filename: str, paragraph_index: int, start_pos: int, end_p
         return f"Failed to format text: {str(e)}"
 
 
-async def create_custom_style(filename: str, style_name: str, 
+def create_custom_style(filename: str, style_name: str, 
                              bold: Optional[bool] = None, italic: Optional[bool] = None,
                              font_size: Optional[int] = None, font_name: Optional[str] = None,
                              color: Optional[str] = None, base_style: Optional[str] = None) -> str:
@@ -189,7 +189,7 @@ async def create_custom_style(filename: str, style_name: str,
         return f"Failed to create style: {str(e)}"
 
 
-async def format_table(filename: str, table_index: int, 
+def format_table(filename: str, table_index: int, 
                       has_header_row: Optional[bool] = None,
                       border_style: Optional[str] = None,
                       shading: Optional[List[List[str]]] = None) -> str:
@@ -233,7 +233,7 @@ async def format_table(filename: str, table_index: int,
         return f"Failed to format table: {str(e)}"
 
 
-async def set_table_cell_shading(filename: str, table_index: int, row_index: int, 
+def set_table_cell_shading(filename: str, table_index: int, row_index: int, 
                                 col_index: int, fill_color: str, pattern: str = "clear") -> str:
     """Apply shading/filling to a specific table cell.
     
@@ -291,7 +291,7 @@ async def set_table_cell_shading(filename: str, table_index: int, row_index: int
         return f"Failed to apply cell shading: {str(e)}"
 
 
-async def apply_table_alternating_rows(filename: str, table_index: int, 
+def apply_table_alternating_rows(filename: str, table_index: int, 
                                      color1: str = "FFFFFF", color2: str = "F2F2F2") -> str:
     """Apply alternating row colors to a table for better readability.
     
@@ -338,7 +338,7 @@ async def apply_table_alternating_rows(filename: str, table_index: int,
         return f"Failed to apply alternating row shading: {str(e)}"
 
 
-async def highlight_table_header(filename: str, table_index: int, 
+def highlight_table_header(filename: str, table_index: int, 
                                header_color: str = "4472C4", text_color: str = "FFFFFF") -> str:
     """Apply special highlighting to table header row.
     
@@ -385,7 +385,7 @@ async def highlight_table_header(filename: str, table_index: int,
         return f"Failed to apply header highlighting: {str(e)}"
 
 
-async def merge_table_cells(filename: str, table_index: int, start_row: int, start_col: int, 
+def merge_table_cells(filename: str, table_index: int, start_row: int, start_col: int, 
                           end_row: int, end_col: int) -> str:
     """Merge cells in a rectangular area of a table.
     
@@ -445,7 +445,7 @@ async def merge_table_cells(filename: str, table_index: int, start_row: int, sta
         return f"Failed to merge cells: {str(e)}"
 
 
-async def merge_table_cells_horizontal(filename: str, table_index: int, row_index: int, 
+def merge_table_cells_horizontal(filename: str, table_index: int, row_index: int, 
                                      start_col: int, end_col: int) -> str:
     """Merge cells horizontally in a single row.
     
@@ -496,7 +496,7 @@ async def merge_table_cells_horizontal(filename: str, table_index: int, row_inde
         return f"Failed to merge cells horizontally: {str(e)}"
 
 
-async def merge_table_cells_vertical(filename: str, table_index: int, col_index: int, 
+def merge_table_cells_vertical(filename: str, table_index: int, col_index: int, 
                                    start_row: int, end_row: int) -> str:
     """Merge cells vertically in a single column.
     
@@ -547,7 +547,7 @@ async def merge_table_cells_vertical(filename: str, table_index: int, col_index:
         return f"Failed to merge cells vertically: {str(e)}"
 
 
-async def set_table_cell_alignment(filename: str, table_index: int, row_index: int, col_index: int,
+def set_table_cell_alignment(filename: str, table_index: int, row_index: int, col_index: int,
                                  horizontal: str = "left", vertical: str = "top") -> str:
     """Set text alignment for a specific table cell.
     
@@ -608,7 +608,7 @@ async def set_table_cell_alignment(filename: str, table_index: int, row_index: i
         return f"Failed to set cell alignment: {str(e)}"
 
 
-async def set_table_alignment_all(filename: str, table_index: int, 
+def set_table_alignment_all(filename: str, table_index: int, 
                                 horizontal: str = "left", vertical: str = "top") -> str:
     """Set text alignment for all cells in a table.
     
@@ -665,7 +665,7 @@ async def set_table_alignment_all(filename: str, table_index: int,
         return f"Failed to set table alignment: {str(e)}"
 
 
-async def set_table_column_width(filename: str, table_index: int, col_index: int, 
+def set_table_column_width(filename: str, table_index: int, col_index: int, 
                                 width: float, width_type: str = "points") -> str:
     """Set the width of a specific table column.
     
@@ -746,7 +746,7 @@ async def set_table_column_width(filename: str, table_index: int, col_index: int
         return f"Failed to set column width: {str(e)}"
 
 
-async def set_table_column_widths(filename: str, table_index: int, widths: list, 
+def set_table_column_widths(filename: str, table_index: int, widths: list, 
                                  width_type: str = "points") -> str:
     """Set the widths of multiple table columns.
     
@@ -822,7 +822,7 @@ async def set_table_column_widths(filename: str, table_index: int, widths: list,
         return f"Failed to set column widths: {str(e)}"
 
 
-async def set_table_width(filename: str, table_index: int, width: float, 
+def set_table_width(filename: str, table_index: int, width: float, 
                          width_type: str = "points") -> str:
     """Set the overall width of a table.
     
@@ -893,7 +893,7 @@ async def set_table_width(filename: str, table_index: int, width: float,
         return f"Failed to set table width: {str(e)}"
 
 
-async def auto_fit_table_columns(filename: str, table_index: int) -> str:
+def auto_fit_table_columns(filename: str, table_index: int) -> str:
     """Set table columns to auto-fit based on content.
     
     Args:
@@ -937,7 +937,7 @@ async def auto_fit_table_columns(filename: str, table_index: int) -> str:
         return f"Failed to set table auto-fit: {str(e)}"
 
 
-async def format_table_cell_text(filename: str, table_index: int, row_index: int, col_index: int,
+def format_table_cell_text(filename: str, table_index: int, row_index: int, col_index: int,
                                  text_content: Optional[str] = None, bold: Optional[bool] = None, italic: Optional[bool] = None,
                                  underline: Optional[bool] = None, color: Optional[str] = None, font_size: Optional[int] = None,
                                  font_name: Optional[str] = None) -> str:
@@ -1022,7 +1022,7 @@ async def format_table_cell_text(filename: str, table_index: int, row_index: int
         return f"Failed to format cell text: {str(e)}"
 
 
-async def set_table_cell_padding(filename: str, table_index: int, row_index: int, col_index: int,
+def set_table_cell_padding(filename: str, table_index: int, row_index: int, col_index: int,
                                  top: Optional[float] = None, bottom: Optional[float] = None, left: Optional[float] = None, 
                                  right: Optional[float] = None, unit: str = "points") -> str:
     """Set padding/margins for a specific table cell.
