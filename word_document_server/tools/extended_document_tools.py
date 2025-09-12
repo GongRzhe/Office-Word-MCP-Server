@@ -15,7 +15,7 @@ from word_document_server.utils.file_utils import check_file_writeable, ensure_d
 from word_document_server.utils.extended_document_utils import get_paragraph_text, find_text
 
 
-async def get_paragraph_text_from_document(filename: str, paragraph_index: int) -> str:
+def get_paragraph_text_from_document(filename: str, paragraph_index: int) -> str:
     """Get text from a specific paragraph in a Word document.
     
     Args:
@@ -38,7 +38,7 @@ async def get_paragraph_text_from_document(filename: str, paragraph_index: int) 
         return f"Failed to get paragraph text: {str(e)}"
 
 
-async def find_text_in_document(filename: str, text_to_find: str, match_case: bool = True, whole_word: bool = False) -> str:
+def find_text_in_document(filename: str, text_to_find: str, match_case: bool = True, whole_word: bool = False) -> str:
     """Find occurrences of specific text in a Word document.
     
     Args:
@@ -63,7 +63,7 @@ async def find_text_in_document(filename: str, text_to_find: str, match_case: bo
         return f"Failed to search for text: {str(e)}"
 
 
-async def convert_to_pdf(filename: str, output_filename: Optional[str] = None) -> str:
+def convert_to_pdf(filename: str, output_filename: Optional[str] = None) -> str:
     """Convert a Word document to PDF format.
     
     Args:
