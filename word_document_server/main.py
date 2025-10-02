@@ -21,7 +21,8 @@ from word_document_server.tools import (
     protection_tools,
     footnote_tools,
     extended_document_tools,
-    comment_tools
+    comment_tools,
+    picture_tools
 )
 from word_document_server.tools.content_tools import replace_paragraph_block_below_header_tool
 from word_document_server.tools.content_tools import replace_block_between_manual_anchors_tool
@@ -429,6 +430,119 @@ def register_tools():
         return format_tools.set_table_cell_padding(filename, table_index, row_index, col_index,
                                                    top, bottom, left, right, unit)
 
+    # Picture manipulation tools
+    @mcp.tool()
+    def resize_picture(filename: str, picture_index: int, width: float = None, 
+                      height: float = None, maintain_aspect_ratio: bool = True):
+        """Resize an existing picture in a Word document.
+        
+        Args:
+            filename: Path to the Word document
+            picture_index: Index of the picture to resize (0-based)
+            width: New width in inches (optional)
+            height: New height in inches (optional)
+            maintain_aspect_ratio: If True and only width or height is specified, 
+                                  the other dimension will be scaled proportionally
+        """
+        return picture_tools.resize_picture(filename, picture_index, width, height, maintain_aspect_ratio)
+    
+    @mcp.tool()
+    def align_picture(filename: str, picture_index: int, alignment: str = "center"):
+        """Set the alignment of a picture in a Word document.
+        
+        Args:
+            filename: Path to the Word document
+            picture_index: Index of the picture to align (0-based)
+            alignment: Alignment type - "left", "center", "right", or "justify"
+        """
+        return picture_tools.align_picture(filename, picture_index, alignment)
+    
+    @mcp.tool()
+    def list_pictures(filename: str):
+        """List all pictures in a Word document with their current properties.
+        
+        Args:
+            filename: Path to the Word document
+        
+        Returns:
+            Information about all pictures including index, location, size, and alignment
+        """
+        return picture_tools.list_pictures(filename)
+    
+    # Batch picture manipulation tools
+    @mcp.tool()
+    def align_pictures_batch(filename: str, picture_indices: list, alignment: str = "center"):
+        """Align multiple pictures at once by specifying their indices.
+        
+        Args:
+            filename: Path to the Word document
+            picture_indices: List of picture indices to align (0-based), e.g. [0, 2, 5, 8]
+            alignment: Alignment type - "left", "center", "right", or "justify"
+        """
+        return picture_tools.align_pictures_batch(filename, picture_indices, alignment)
+    
+    @mcp.tool()
+    def align_all_pictures(filename: str, alignment: str = "center"):
+        """Align all pictures in the document to the same alignment.
+        
+        Args:
+            filename: Path to the Word document
+            alignment: Alignment type - "left", "center", "right", or "justify"
+        """
+        return picture_tools.align_all_pictures(filename, alignment)
+    
+    @mcp.tool()
+    def resize_pictures_batch(filename: str, picture_indices: list, width: float = None,
+                             height: float = None, maintain_aspect_ratio: bool = True):
+        """Resize multiple pictures at once by specifying their indices.
+        
+        Args:
+            filename: Path to the Word document
+            picture_indices: List of picture indices to resize (0-based), e.g. [0, 2, 5, 8]
+            width: New width in inches (optional)
+            height: New height in inches (optional)
+            maintain_aspect_ratio: If True and only width or height is specified,
+                                  the other dimension will be scaled proportionally
+        """
+        return picture_tools.resize_pictures_batch(filename, picture_indices, width, height, maintain_aspect_ratio)
+    
+    @mcp.tool()
+    def resize_all_pictures(filename: str, width: float = None, height: float = None,
+                           maintain_aspect_ratio: bool = True):
+        """Resize all pictures in the document to the same dimensions.
+        
+        Args:
+            filename: Path to the Word document
+            width: New width in inches (optional)
+            height: New height in inches (optional)
+            maintain_aspect_ratio: If True and only width or height is specified,
+                                  the other dimension will be scaled proportionally
+        """
+        return picture_tools.resize_all_pictures(filename, width, height, maintain_aspect_ratio)
+    
+    @mcp.tool()
+    def process_pictures_by_size(filename: str, min_width: float = None, max_width: float = None,
+                                min_height: float = None, max_height: float = None,
+                                alignment: str = None, resize_width: float = None,
+                                resize_height: float = None):
+        """Process pictures based on size filters - align or resize pictures that match criteria.
+        
+        Args:
+            filename: Path to the Word document
+            min_width: Minimum width in inches (pictures >= this will be processed)
+            max_width: Maximum width in inches (pictures <= this will be processed)
+            min_height: Minimum height in inches (pictures >= this will be processed)
+            max_height: Maximum height in inches (pictures <= this will be processed)
+            alignment: Optional alignment to apply ("left", "center", "right", "justify")
+            resize_width: Optional new width in inches
+            resize_height: Optional new height in inches
+        
+        Examples:
+            - Process pictures wider than 7 inches: min_width=7.0, alignment="center"
+            - Process pictures taller than 10 inches: min_height=10.0, resize_height=6.0
+        """
+        return picture_tools.process_pictures_by_size(filename, min_width, max_width, min_height,
+                                                     max_height, alignment, resize_width, resize_height)
 
 
 def run_server():
