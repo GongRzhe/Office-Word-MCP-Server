@@ -40,8 +40,8 @@ The server features a modular architecture that separates concerns into core fun
 
 ### Content Creation
 
-- Add headings with different levels
-- Insert paragraphs with optional styling
+- Add headings with different levels and direct formatting (font, size, bold, italic, borders)
+- Insert paragraphs with optional styling and direct formatting (font, size, bold, italic, color)
 - Create tables with custom data
 - Add images with proportional scaling
 - Insert page breaks
@@ -61,6 +61,9 @@ The server features a modular architecture that separates concerns into core fun
 - Individual cell text formatting within tables
 - Multiple formatting combinations for enhanced visual appeal
 - Font customization with family and size control
+- Direct formatting during content creation (paragraphs and headings)
+- Reduce function calls by combining content creation with formatting
+- Add section header borders for visual separation
 
 ### Table Formatting
 
@@ -189,6 +192,9 @@ Once configured, you can ask Claude to perform operations like:
 
 - "Create a new document called 'report.docx' with a title page"
 - "Add a heading and three paragraphs to my document"
+- "Add my name in Helvetica 36pt bold at the top of the document"
+- "Add a section heading 'Summary' in Helvetica 14pt bold with a bottom border"
+- "Add a paragraph in Times New Roman 14pt with italic blue text"
 - "Insert a 4x4 table with sales data"
 - "Format the word 'important' in paragraph 2 to be bold and red"
 - "Search and replace all instances of 'old term' with 'new term'"
@@ -221,8 +227,10 @@ convert_to_pdf(filename, output_filename=None)
 ### Content Addition
 
 ```python
-add_heading(filename, text, level=1)
-add_paragraph(filename, text, style=None)
+add_heading(filename, text, level=1, font_name=None, font_size=None,
+            bold=None, italic=None, border_bottom=False)
+add_paragraph(filename, text, style=None, font_name=None, font_size=None,
+              bold=None, italic=None, color=None)
 add_table(filename, rows, cols, data=None)
 add_picture(filename, image_path, width=None)
 add_page_break(filename)

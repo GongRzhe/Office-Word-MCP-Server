@@ -163,7 +163,7 @@ def register_tools():
     @mcp.tool()
     def add_heading(filename: str, text: str, level: int = 1,
                     font_name: str = None, font_size: int = None,
-                    bold: bool = None, border_bottom: bool = False):
+                    bold: bool = None, italic: bool = None, border_bottom: bool = False):
         """Add a heading to a Word document with optional formatting.
 
         Args:
@@ -173,9 +173,10 @@ def register_tools():
             font_name: Font family (e.g., 'Helvetica')
             font_size: Font size in points (e.g., 14)
             bold: Make heading bold
+            italic: Make heading italic
             border_bottom: Add bottom border (for section headers)
         """
-        return content_tools.add_heading(filename, text, level, font_name, font_size, bold, border_bottom)
+        return content_tools.add_heading(filename, text, level, font_name, font_size, bold, italic, border_bottom)
     
     @mcp.tool()
     def add_picture(filename: str, image_path: str, width: float = None):

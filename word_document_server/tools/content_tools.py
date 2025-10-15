@@ -16,7 +16,8 @@ from word_document_server.core.styles import ensure_heading_style, ensure_table_
 
 async def add_heading(filename: str, text: str, level: int = 1,
                       font_name: Optional[str] = None, font_size: Optional[int] = None,
-                      bold: Optional[bool] = None, border_bottom: bool = False) -> str:
+                      bold: Optional[bool] = None, italic: Optional[bool] = None,
+                      border_bottom: bool = False) -> str:
     """Add a heading to a Word document with optional formatting.
 
     Args:
@@ -26,6 +27,7 @@ async def add_heading(filename: str, text: str, level: int = 1,
         font_name: Font family (e.g., 'Helvetica')
         font_size: Font size in points (e.g., 14)
         bold: True/False for bold text
+        italic: True/False for italic text
         border_bottom: True to add bottom border (for section headers)
     """
     filename = ensure_docx_extension(filename)
@@ -74,7 +76,7 @@ async def add_heading(filename: str, text: str, level: int = 1,
                     run.font.size = Pt(12)
 
         # Apply formatting to all runs in the heading
-        if any([font_name, font_size, bold is not None]):
+        if any([font_name, font_size, bold is not None, italic is not None]):
             for run in heading.runs:
                 if font_name:
                     run.font.name = font_name
@@ -82,6 +84,8 @@ async def add_heading(filename: str, text: str, level: int = 1,
                     run.font.size = Pt(font_size)
                 if bold is not None:
                     run.font.bold = bold
+                if italic is not None:
+                    run.font.italic = italic
 
         # Add bottom border if requested
         if border_bottom:
