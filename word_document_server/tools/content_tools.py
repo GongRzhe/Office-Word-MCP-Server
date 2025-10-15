@@ -7,96 +7,136 @@ including headings, paragraphs, tables, images, and page breaks.
 import os
 from typing import List, Optional, Dict, Any
 from docx import Document
-from docx.shared import Inches, Pt
+from docx.shared import Inches, Pt, RGBColor
 
 from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension
 from word_document_server.utils.document_utils import find_and_replace_text, insert_header_near_text, insert_numbered_list_near_text, insert_line_or_paragraph_near_text, replace_paragraph_block_below_header, replace_block_between_manual_anchors
 from word_document_server.core.styles import ensure_heading_style, ensure_table_style
 
 
-async def add_heading(filename: str, text: str, level: int = 1) -> str:
-    """Add a heading to a Word document.
-    
+async def add_heading(filename: str, text: str, level: int = 1,
+                      font_name: Optional[str] = None, font_size: Optional[int] = None,
+                      bold: Optional[bool] = None, border_bottom: bool = False) -> str:
+    """Add a heading to a Word document with optional formatting.
+
     Args:
         filename: Path to the Word document
         text: Heading text
         level: Heading level (1-9, where 1 is the highest level)
+        font_name: Font family (e.g., 'Helvetica')
+        font_size: Font size in points (e.g., 14)
+        bold: True/False for bold text
+        border_bottom: True to add bottom border (for section headers)
     """
     filename = ensure_docx_extension(filename)
-    
+
     # Ensure level is converted to integer
     try:
         level = int(level)
     except (ValueError, TypeError):
         return "Invalid parameter: level must be an integer between 1 and 9"
-    
+
     # Validate level range
     if level < 1 or level > 9:
         return f"Invalid heading level: {level}. Level must be between 1 and 9."
-    
+
     if not os.path.exists(filename):
         return f"Document {filename} does not exist"
-    
+
     # Check if file is writeable
     is_writeable, error_message = check_file_writeable(filename)
     if not is_writeable:
         # Suggest creating a copy
         return f"Cannot modify document: {error_message}. Consider creating a copy first or creating a new document."
-    
+
     try:
         doc = Document(filename)
-        
+
         # Ensure heading styles exist
         ensure_heading_style(doc)
-        
+
         # Try to add heading with style
         try:
             heading = doc.add_heading(text, level=level)
-            doc.save(filename)
-            return f"Heading '{text}' (level {level}) added to {filename}"
         except Exception as style_error:
             # If style-based approach fails, use direct formatting
-            paragraph = doc.add_paragraph(text)
-            paragraph.style = doc.styles['Normal']
-            run = paragraph.runs[0]
-            run.bold = True
-            # Adjust size based on heading level
-            if level == 1:
-                run.font.size = Pt(16)
-            elif level == 2:
-                run.font.size = Pt(14)
-            else:
-                run.font.size = Pt(12)
-            
-            doc.save(filename)
-            return f"Heading '{text}' added to {filename} with direct formatting (style not available)"
+            heading = doc.add_paragraph(text)
+            heading.style = doc.styles['Normal']
+            if heading.runs:
+                run = heading.runs[0]
+                run.bold = True
+                # Adjust size based on heading level
+                if level == 1:
+                    run.font.size = Pt(16)
+                elif level == 2:
+                    run.font.size = Pt(14)
+                else:
+                    run.font.size = Pt(12)
+
+        # Apply formatting to all runs in the heading
+        if any([font_name, font_size, bold is not None]):
+            for run in heading.runs:
+                if font_name:
+                    run.font.name = font_name
+                if font_size:
+                    run.font.size = Pt(font_size)
+                if bold is not None:
+                    run.font.bold = bold
+
+        # Add bottom border if requested
+        if border_bottom:
+            from docx.oxml import OxmlElement
+            from docx.oxml.ns import qn
+
+            pPr = heading._element.get_or_add_pPr()
+            pBdr = OxmlElement('w:pBdr')
+
+            bottom = OxmlElement('w:bottom')
+            bottom.set(qn('w:val'), 'single')
+            bottom.set(qn('w:sz'), '4')  # 0.5pt border
+            bottom.set(qn('w:space'), '0')
+            bottom.set(qn('w:color'), '000000')
+
+            pBdr.append(bottom)
+            pPr.append(pBdr)
+
+        doc.save(filename)
+        return f"Heading '{text}' (level {level}) added to {filename}"
     except Exception as e:
         return f"Failed to add heading: {str(e)}"
 
 
-async def add_paragraph(filename: str, text: str, style: Optional[str] = None) -> str:
-    """Add a paragraph to a Word document.
-    
+async def add_paragraph(filename: str, text: str, style: Optional[str] = None,
+                        font_name: Optional[str] = None, font_size: Optional[int] = None,
+                        bold: Optional[bool] = None, italic: Optional[bool] = None,
+                        color: Optional[str] = None) -> str:
+    """Add a paragraph to a Word document with optional formatting.
+
     Args:
         filename: Path to the Word document
         text: Paragraph text
         style: Optional paragraph style name
+        font_name: Font family (e.g., 'Helvetica', 'Times New Roman')
+        font_size: Font size in points (e.g., 14, 36)
+        bold: True/False for bold text
+        italic: True/False for italic text
+        color: RGB color as hex string (e.g., '000000' for black)
     """
     filename = ensure_docx_extension(filename)
-    
+
     if not os.path.exists(filename):
         return f"Document {filename} does not exist"
-    
+
     # Check if file is writeable
     is_writeable, error_message = check_file_writeable(filename)
     if not is_writeable:
         # Suggest creating a copy
         return f"Cannot modify document: {error_message}. Consider creating a copy first or creating a new document."
-    
+
     try:
         doc = Document(filename)
         paragraph = doc.add_paragraph(text)
-        
+
         if style:
             try:
                 paragraph.style = style
@@ -105,7 +145,23 @@ async def add_paragraph(filename: str, text: str, style: Optional[str] = None) -
                 paragraph.style = doc.styles['Normal']
                 doc.save(filename)
                 return f"Style '{style}' not found, paragraph added with default style to {filename}"
-        
+
+        # Apply formatting to all runs in the paragraph
+        if any([font_name, font_size, bold is not None, italic is not None, color]):
+            for run in paragraph.runs:
+                if font_name:
+                    run.font.name = font_name
+                if font_size:
+                    run.font.size = Pt(font_size)
+                if bold is not None:
+                    run.font.bold = bold
+                if italic is not None:
+                    run.font.italic = italic
+                if color:
+                    # Remove any '#' prefix if present
+                    color_hex = color.lstrip('#')
+                    run.font.color.rgb = RGBColor.from_string(color_hex)
+
         doc.save(filename)
         return f"Paragraph added to {filename}"
     except Exception as e:

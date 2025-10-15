@@ -143,14 +143,39 @@ def register_tools():
         return content_tools.insert_numbered_list_near_text_tool(filename, target_text, list_items, position, target_paragraph_index)
     # Content tools (paragraphs, headings, tables, etc.)
     @mcp.tool()
-    def add_paragraph(filename: str, text: str, style: str = None):
-        """Add a paragraph to a Word document."""
-        return content_tools.add_paragraph(filename, text, style)
+    def add_paragraph(filename: str, text: str, style: str = None,
+                      font_name: str = None, font_size: int = None,
+                      bold: bool = None, italic: bool = None, color: str = None):
+        """Add a paragraph to a Word document with optional formatting.
+
+        Args:
+            filename: Path to Word document
+            text: Paragraph text content
+            style: Optional paragraph style name
+            font_name: Font family (e.g., 'Helvetica', 'Times New Roman')
+            font_size: Font size in points (e.g., 14, 36)
+            bold: Make text bold
+            italic: Make text italic
+            color: Text color as hex RGB (e.g., '000000')
+        """
+        return content_tools.add_paragraph(filename, text, style, font_name, font_size, bold, italic, color)
     
     @mcp.tool()
-    def add_heading(filename: str, text: str, level: int = 1):
-        """Add a heading to a Word document."""
-        return content_tools.add_heading(filename, text, level)
+    def add_heading(filename: str, text: str, level: int = 1,
+                    font_name: str = None, font_size: int = None,
+                    bold: bool = None, border_bottom: bool = False):
+        """Add a heading to a Word document with optional formatting.
+
+        Args:
+            filename: Path to Word document
+            text: Heading text
+            level: Heading level (1-9)
+            font_name: Font family (e.g., 'Helvetica')
+            font_size: Font size in points (e.g., 14)
+            bold: Make heading bold
+            border_bottom: Add bottom border (for section headers)
+        """
+        return content_tools.add_heading(filename, text, level, font_name, font_size, bold, border_bottom)
     
     @mcp.tool()
     def add_picture(filename: str, image_path: str, width: float = None):
