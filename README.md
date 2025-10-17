@@ -330,6 +330,36 @@ Enable detailed logging by setting the environment variable:
 ```bash
 export MCP_DEBUG=1  # Linux/macOS
 set MCP_DEBUG=1     # Windows
+
+## Configuring the default save directory
+
+By default, the server reads and writes documents relative to the current working directory at startup. You can override this with the `WORD_DOC_BASE_DIR` environment variable to centralize where documents are created, listed, and modified.
+
+Effects:
+
+- If `WORD_DOC_BASE_DIR` is set, the server will `chdir` into that directory at startup and print the effective working directory.
+- All relative paths (e.g., `report.docx`, `images/pic.png`, `list_available_documents(".")`) will resolve under this directory.
+- The directory will be created automatically if it doesn't exist.
+
+Set via `.env` (recommended):
+
+```env
+# .env
+WORD_DOC_BASE_DIR=~/Documents/word-mcp
+```
+
+Or set in your shell before launching the server:
+
+```bash
+export WORD_DOC_BASE_DIR=~/Documents/word-mcp   # Linux/macOS
+set WORD_DOC_BASE_DIR=C:\\Users\\you\\Documents\\word-mcp  # Windows (Command Prompt)
+```
+
+Example:
+
+- With `WORD_DOC_BASE_DIR=~/Documents/word-mcp`, calling `create_document("demo.docx")` will create `~/Documents/word-mcp/demo.docx`.
+- Running `list_available_documents()` or `list_available_documents(".")` lists `.docx` files inside `~/Documents/word-mcp`.
+
 ```
 
 ## Contributing

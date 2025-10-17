@@ -436,6 +436,24 @@ def run_server():
     # Get transport configuration
     config = get_transport_config()
     
+    # Honor optional base directory for all document operations
+    # If WORD_DOC_BASE_DIR is set, expand it and chdir so relative paths resolve under it
+    try:
+        base_dir = os.getenv('WORD_DOC_BASE_DIR', '').strip()
+        if base_dir:
+            # Expand env vars and ~, then get absolute path
+            expanded = os.path.expandvars(os.path.expanduser(base_dir))
+            abs_base = os.path.abspath(expanded)
+            os.makedirs(abs_base, exist_ok=True)
+            os.chdir(abs_base)
+            print(f"Working directory set by WORD_DOC_BASE_DIR: {abs_base}")
+        else:
+            # Print current working dir for transparency
+            print(f"Working directory (default): {os.getcwd()}")
+    except Exception as e:
+        # Do not crash server if base dir setup fails; just warn and continue
+        print(f"Warning: Failed to set WORD_DOC_BASE_DIR: {e}")
+    
     # Setup logging
     # setup_logging(config['debug'])
     
