@@ -53,7 +53,8 @@ def get_transport_config():
     
     config['transport'] = transport
     config['host'] = os.getenv('MCP_HOST', config['host'])
-    config['port'] = int(os.getenv('MCP_PORT', config['port']))
+    # Use PORT from Render if available, otherwise fall back to MCP_PORT or default
+    config['port'] = int(os.getenv('PORT', os.getenv('MCP_PORT', config['port'])))
     config['path'] = os.getenv('MCP_PATH', config['path'])
     config['sse_path'] = os.getenv('MCP_SSE_PATH', config['sse_path'])
     
