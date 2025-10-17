@@ -7,6 +7,7 @@ from docx import Document
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
 
 def get_document_properties(doc_path: str) -> Dict[str, Any]:
@@ -294,15 +295,55 @@ def insert_line_or_paragraph_near_text(doc_path: str, target_text: str = None, l
         return f"Failed to insert line/paragraph: {str(e)}"
 
 
-def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None) -> str:
+def add_bullet_numbering(paragraph, num_id=1, level=0):
     """
-    Insert a numbered list before or after the target paragraph. Specify by text or paragraph index. Skips TOC paragraphs in text search.
+    Add bullet/numbering XML to a paragraph.
+
+    Args:
+        paragraph: python-docx Paragraph object
+        num_id: Numbering definition ID (1=bullets, 2=numbers, etc.)
+        level: Indentation level (0=first level, 1=second level, etc.)
+
+    Returns:
+        The modified paragraph
+    """
+    # Get or create paragraph properties
+    pPr = paragraph._element.get_or_add_pPr()
+
+    # Remove existing numPr if any (to avoid duplicates)
+    existing_numPr = pPr.find(qn('w:numPr'))
+    if existing_numPr is not None:
+        pPr.remove(existing_numPr)
+
+    # Create numbering properties element
+    numPr = OxmlElement('w:numPr')
+
+    # Set indentation level
+    ilvl = OxmlElement('w:ilvl')
+    ilvl.set(qn('w:val'), str(level))
+    numPr.append(ilvl)
+
+    # Set numbering definition ID
+    numId = OxmlElement('w:numId')
+    numId.set(qn('w:val'), str(num_id))
+    numPr.append(numId)
+
+    # Add to paragraph properties
+    pPr.append(numPr)
+
+    return paragraph
+
+
+def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None, bullet_type: str = 'bullet') -> str:
+    """
+    Insert a bulleted or numbered list before or after the target paragraph. Specify by text or paragraph index. Skips TOC paragraphs in text search.
     Args:
         doc_path: Path to the Word document
         target_text: Text to search for in paragraphs (optional if using index)
         list_items: List of strings, each as a list item
         position: 'before' or 'after' (default: 'after')
         target_paragraph_index: Optional paragraph index to use as anchor
+        bullet_type: 'bullet' for bullets (•), 'number' for numbers (1,2,3) (default: 'bullet')
     Returns:
         Status message
     """
@@ -339,9 +380,12 @@ def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_
                 if p is para:
                     anchor_index = i
                     break
-        # Robust style selection for numbered list
+        # Determine numbering ID based on bullet_type
+        num_id = 1 if bullet_type == 'bullet' else 2
+
+        # Use ListParagraph style for proper list formatting
         style_name = None
-        for candidate in ['List Number', 'List Paragraph', 'Normal']:
+        for candidate in ['List Paragraph', 'ListParagraph', 'Normal']:
             try:
                 _ = doc.styles[candidate]
                 style_name = candidate
@@ -350,9 +394,12 @@ def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_
                 continue
         if not style_name:
             style_name = None  # fallback to default
+
         new_paras = []
         for item in (list_items or []):
             p = doc.add_paragraph(item, style=style_name)
+            # Add bullet numbering XML - this is the fix!
+            add_bullet_numbering(p, num_id=num_id, level=0)
             new_paras.append(p)
         # Move the new paragraphs to the correct position
         for p in reversed(new_paras):
@@ -361,10 +408,11 @@ def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_
             else:
                 para._element.addnext(p._element)
         doc.save(doc_path)
+        list_type = "bulleted" if bullet_type == 'bullet' else "numbered"
         if anchor_index is not None:
-            return f"Numbered list inserted {position} paragraph (index {anchor_index})."
+            return f"{list_type.capitalize()} list with {len(new_paras)} items inserted {position} paragraph (index {anchor_index})."
         else:
-            return f"Numbered list inserted {position} the target paragraph."
+            return f"{list_type.capitalize()} list with {len(new_paras)} items inserted {position} the target paragraph."
     except Exception as e:
         return f"Failed to insert numbered list: {str(e)}"
 

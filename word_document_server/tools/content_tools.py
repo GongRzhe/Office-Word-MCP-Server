@@ -404,9 +404,9 @@ async def insert_header_near_text_tool(filename: str, target_text: str = None, h
     """Insert a header (with specified style) before or after the target paragraph. Specify by text or paragraph index."""
     return insert_header_near_text(filename, target_text, header_title, position, header_style, target_paragraph_index)
 
-async def insert_numbered_list_near_text_tool(filename: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None) -> str:
-    """Insert a numbered list before or after the target paragraph. Specify by text or paragraph index."""
-    return insert_numbered_list_near_text(filename, target_text, list_items, position, target_paragraph_index)
+async def insert_numbered_list_near_text_tool(filename: str, target_text: str = None, list_items: list = None, position: str = 'after', target_paragraph_index: int = None, bullet_type: str = 'bullet') -> str:
+    """Insert a bulleted or numbered list before or after the target paragraph. Specify by text or paragraph index."""
+    return insert_numbered_list_near_text(filename, target_text, list_items, position, target_paragraph_index, bullet_type)
 
 async def insert_line_or_paragraph_near_text_tool(filename: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None) -> str:
     """Insert a new line or paragraph (with specified or matched style) before or after the target paragraph. Specify by text or paragraph index."""
