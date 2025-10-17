@@ -45,12 +45,14 @@ The server features a modular architecture that separates concerns into core fun
 - Create tables with custom data
 - Add images with proportional scaling
 - Insert page breaks
+- Insert bulleted and numbered lists with proper XML formatting
 - Add footnotes and endnotes to documents
 - Convert footnotes to endnotes
 - Customize footnote and endnote styling
 - Create professional table layouts for technical documentation
 - Design callout boxes and formatted content for instructional materials
 - Build structured data tables for business reports with consistent styling
+- Insert content relative to existing text or paragraph indices
 
 ### Rich Text Formatting
 
@@ -86,6 +88,9 @@ The server features a modular architecture that separates concerns into core fun
 ### Advanced Document Manipulation
 
 - Delete paragraphs
+- Insert content relative to specific text or paragraph indices
+- Insert bulleted and numbered lists with proper XML numbering structure
+- Insert headers and paragraphs before or after target locations
 - Create custom document styles
 - Apply consistent formatting throughout documents
 - Format specific ranges of text with detailed control
@@ -195,6 +200,9 @@ Once configured, you can ask Claude to perform operations like:
 - "Add my name in Helvetica 36pt bold at the top of the document"
 - "Add a section heading 'Summary' in Helvetica 14pt bold with a bottom border"
 - "Add a paragraph in Times New Roman 14pt with italic blue text"
+- "Insert a bulleted list after the paragraph containing 'Introduction'"
+- "Insert a numbered list with items: 'First step', 'Second step', 'Third step'"
+- "Add bullet points after the 'Summary' heading"
 - "Insert a 4x4 table with sales data"
 - "Format the word 'important' in paragraph 2 to be bold and red"
 - "Search and replace all instances of 'old term' with 'new term'"
@@ -234,6 +242,27 @@ add_paragraph(filename, text, style=None, font_name=None, font_size=None,
 add_table(filename, rows, cols, data=None)
 add_picture(filename, image_path, width=None)
 add_page_break(filename)
+```
+
+### Advanced Content Manipulation
+
+```python
+# Insert content relative to existing text or paragraph index
+insert_header_near_text(filename, target_text=None, header_title=None,
+                       position='after', header_style='Heading 1',
+                       target_paragraph_index=None)
+
+insert_line_or_paragraph_near_text(filename, target_text=None, line_text=None,
+                                   position='after', line_style=None,
+                                   target_paragraph_index=None)
+
+# Insert bulleted or numbered lists with proper XML formatting
+insert_numbered_list_near_text(filename, target_text=None, list_items=None,
+                              position='after', target_paragraph_index=None,
+                              bullet_type='bullet')
+# bullet_type options:
+#   'bullet' - Creates bulleted list with bullets (•)
+#   'number' - Creates numbered list (1, 2, 3, ...)
 ```
 
 ### Content Extraction
