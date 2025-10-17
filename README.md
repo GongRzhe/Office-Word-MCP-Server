@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/gongrzhe-office-word-mcp-server-badge.png)](https://mseep.ai/app/gongrzhe-office-word-mcp-server)
+
 # Office-Word-MCP-Server
 
 [![smithery badge](https://smithery.ai/badge/@GongRzhe/Office-Word-MCP-Server)](https://smithery.ai/server/@GongRzhe/Office-Word-MCP-Server)
