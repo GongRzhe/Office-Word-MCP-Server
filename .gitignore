@@ -13,3 +13,4 @@ wheels/
 # Virtual environments
 .venv
 .env.example
+.idea
