@@ -111,6 +111,19 @@ The server features a modular architecture that separates concerns into core fun
 - Get comments for specific paragraphs
 - Access comment metadata (author, date, text)
 
+### Picture Manipulation
+
+- List all pictures in a document with detailed properties (size, location, alignment)
+- Resize individual pictures with aspect ratio control
+- Align pictures (left, center, right, justify)
+- Batch resize multiple pictures at once
+- Batch align multiple pictures at once
+- Resize all pictures in a document uniformly
+- Align all pictures in a document uniformly
+- Smart filtering: process pictures based on size criteria
+- Combined operations: filter, resize, and align in one step
+- Support for pictures in both paragraphs and table cells
+
 ## Installation
 
 ### Installing via Smithery
@@ -216,6 +229,13 @@ Once configured, you can ask Claude to perform operations like:
 - "Create a callout table with a blue checkmark icon and white text"
 - "Set the first column width to 50 points and auto-fit the remaining columns"
 - "Apply alternating row colors to make the table more readable"
+- "List all pictures in my document"
+- "Resize picture 3 to 5 inches wide while keeping aspect ratio"
+- "Center align all pictures in the document"
+- "Align pictures 0, 2, 5, and 8 to the left"
+- "Resize all pictures to 6 inches wide"
+- "Find pictures wider than 7 inches and resize them to 6 inches"
+- "Center align pictures that are taller than 10 inches"
 
 
 ## API Reference
@@ -329,6 +349,30 @@ auto_fit_table_columns(filename, table_index)
 get_all_comments(filename)
 get_comments_by_author(filename, author)
 get_comments_for_paragraph(filename, paragraph_index)
+```
+
+### Picture Manipulation
+
+```python
+# List and inspect pictures
+list_pictures(filename)
+
+# Individual picture operations
+resize_picture(filename, picture_index, width=None, height=None, maintain_aspect_ratio=True)
+align_picture(filename, picture_index, alignment="center")
+
+# Batch operations on specific pictures
+resize_pictures_batch(filename, picture_indices, width=None, height=None, maintain_aspect_ratio=True)
+align_pictures_batch(filename, picture_indices, alignment="center")
+
+# Operations on all pictures
+resize_all_pictures(filename, width=None, height=None, maintain_aspect_ratio=True)
+align_all_pictures(filename, alignment="center")
+
+# Smart filtering and processing
+process_pictures_by_size(filename, min_width=None, max_width=None, 
+                        min_height=None, max_height=None,
+                        alignment=None, resize_width=None, resize_height=None)
 ```
 
 ## Troubleshooting
