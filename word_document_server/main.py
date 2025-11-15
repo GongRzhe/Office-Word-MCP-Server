@@ -414,6 +414,12 @@ def register_tools():
     def get_comments_for_paragraph(filename: str, paragraph_index: int):
         """Extract comments for a specific paragraph in a Word document."""
         return comment_tools.get_comments_for_paragraph(filename, paragraph_index)
+    
+    @mcp.tool()
+    def reply_to_comment(filename: str, comment_id: str, reply_text: str, author: str = "", initials: str = ""):
+        """Add a reply to an existing comment in a Word document."""
+        return comment_tools.reply_to_comment(filename, comment_id, reply_text, author, initials)
+    
     # New table column width tools
     @mcp.tool()
     def set_table_column_width(filename: str, table_index: int, col_index: int, 
