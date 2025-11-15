@@ -13,7 +13,8 @@ from word_document_server.utils.file_utils import ensure_docx_extension
 from word_document_server.core.comments import (
     extract_all_comments,
     filter_comments_by_author,
-    get_comments_for_paragraph
+    get_comments_for_paragraph,
+    add_reply_to_comment
 )
 
 
@@ -165,4 +166,67 @@ async def get_comments_for_paragraph(filename: str, paragraph_index: int) -> str
         return json.dumps({
             'success': False,
             'error': f'Failed to extract comments: {str(e)}'
+        }, indent=2)
+
+
+async def reply_to_comment(filename: str, comment_id: str, reply_text: str, author: str = "", initials: str = "") -> str:
+    """
+    Add a reply to an existing comment in a Word document.
+    
+    Args:
+        filename: Path to the Word document
+        comment_id: Identifier of the comment to reply to. Can be:
+            - Timestamp (ISO format, e.g., "2025-11-06T21:57:00+00:00") - recommended for reliable identification
+            - Comment ID from comment data (e.g., "comment_1", "comment_2")
+            - Numeric string (e.g., "0", "1") - less reliable as indices may shift
+        reply_text: Text content for the reply
+        author: Author name for the reply (optional)
+        initials: Author initials for the reply (optional)
+        
+    Returns:
+        JSON string indicating success or failure
+    """
+    filename = ensure_docx_extension(filename)
+    
+    if not os.path.exists(filename):
+        return json.dumps({
+            'success': False,
+            'error': f'Document {filename} does not exist'
+        }, indent=2)
+    
+    if not comment_id or not str(comment_id).strip():
+        return json.dumps({
+            'success': False,
+            'error': 'Comment ID cannot be empty'
+        }, indent=2)
+    
+    if not reply_text or not reply_text.strip():
+        return json.dumps({
+            'success': False,
+            'error': 'Reply text cannot be empty'
+        }, indent=2)
+    
+    try:
+        # Add reply to the comment using COM interface
+        # This creates a proper reply that appears as a separate comment in the thread
+        success = add_reply_to_comment(filename, comment_id, reply_text, author, initials)
+        
+        if success:
+            return json.dumps({
+                'success': True,
+                'message': f'Reply added to comment {comment_id}',
+                'comment_id': comment_id,
+                'reply_text': reply_text,
+                'author': author if author else 'Current user'
+            }, indent=2)
+        else:
+            return json.dumps({
+                'success': False,
+                'error': f'Comment with ID {comment_id} not found or could not be accessed. Make sure pywin32 is installed.'
+            }, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            'success': False,
+            'error': f'Failed to add reply to comment: {str(e)}'
         }, indent=2)
