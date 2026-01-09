@@ -40,3 +40,11 @@ from word_document_server.tools.footnote_tools import (
 from word_document_server.tools.comment_tools import (
     get_all_comments, get_comments_by_author, get_comments_for_paragraph
 )
+
+# Picture tools
+from word_document_server.tools.picture_tools import (
+    resize_picture, align_picture, list_pictures,
+    align_pictures_batch, align_all_pictures,
+    resize_pictures_batch, resize_all_pictures,
+    process_pictures_by_size
+)
