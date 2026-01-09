@@ -1,0 +1,20 @@
+2025-11-25 10:38:29,083 - INFO - Processing request of type ListToolsRequest
+2025-11-25 10:38:29,089 - INFO - Processing request of type ListResourcesRequest
+2025-11-25 11:02:28,181 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:02:37,342 - INFO - Processing request of type CallToolRequest
+2025-11-25 11:02:37,366 - INFO - Chamando _process_dynamic_table_placeholder agora...
+2025-11-25 11:06:01,650 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:06:19,915 - INFO - Processing request of type CallToolRequest
+2025-11-25 11:06:19,957 - INFO - Chamando _process_dynamic_table_placeholder agora...
+2025-11-25 11:13:51,684 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:14:11,423 - INFO - Processing request of type CallToolRequest
+2025-11-25 11:14:11,463 - INFO - Chamando _process_dynamic_table_placeholder agora...
+2025-11-25 11:17:50,394 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:17:55,748 - INFO - Processing request of type CallToolRequest
+2025-11-25 11:29:28,063 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:29:54,441 - INFO - Processing request of type CallToolRequest
+2025-11-25 11:29:54,481 - INFO - Chamando _process_dynamic_table_placeholder agora...
+2025-11-25 11:35:31,883 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:35:38,240 - INFO - Processing request of type CallToolRequest
+2025-11-25 11:36:18,456 - INFO - Processing request of type ListToolsRequest
+2025-11-25 11:36:25,482 - INFO - Processing request of type CallToolRequest

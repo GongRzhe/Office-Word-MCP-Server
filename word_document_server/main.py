@@ -8,6 +8,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
+
 # Load environment variables from .env file
 print("Loading configuration from .env file...")
 load_dotenv()
@@ -576,6 +577,43 @@ def register_tools():
     def convert_to_pdf(filename: str, output_filename: str = None):
         """Convert a Word document to PDF format."""
         return extended_document_tools.convert_to_pdf(filename, output_filename)
+    
+    @mcp.tool()
+    def fill_document_template(template_path: str, output_path: str, data_json: str):
+        """Fill a Word document template using docxtpl (Jinja2) with provided data.
+        
+        Allows populating templates with:
+        - Simple variables (e.g., {{assunto}}, {{codigo}})
+        - Loops for tables (e.g., {% for item in secao %})
+        - Conditional content
+        - Header/footer variables
+        
+        Args:
+            template_path: Path to template Word document
+            output_path: Path for the filled output document
+            data_json: JSON string with data matching template variables
+        """
+        return document_tools.fill_document_template(template_path, output_path, data_json)
+    
+    @mcp.tool()
+    def fill_document_simple(template_path: str, output_path: str, data_json: str):
+        """Fill a Word document template using simple text replacement (python-docx).
+        
+        Better formatting preservation than docxtpl. Maintains ALL original formatting:
+        - Paragraph styles and spacing
+        - Font formatting
+        - Alignment and indentation
+        
+        Template syntax:
+        - Simple variables: {{variavel}}
+        - Loop: {{LOOP:secao}} followed by paragraphs with {{titulo}} and {{paragrafo}}
+        
+        Args:
+            template_path: Path to template Word document
+            output_path: Path for the filled output document
+            data_json: JSON string with data
+        """
+        return document_tools.fill_document_simple(template_path, output_path, data_json)
 
     @mcp.tool(
         annotations=ToolAnnotations(

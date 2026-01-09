@@ -1,3 +1,8 @@
+# Comandos para rodar o projeto
+ - source venv/Scripts/activate
+ - pip install -e .
+ - python -m word_document_server.main
+
 # Office-Word-MCP-Server
 
 [![smithery badge](https://smithery.ai/badge/@GongRzhe/Office-Word-MCP-Server)](https://smithery.ai/server/@GongRzhe/Office-Word-MCP-Server)
