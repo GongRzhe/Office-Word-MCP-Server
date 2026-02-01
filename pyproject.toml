@@ -36,5 +36,8 @@ only-include = [
 ]
 sources = ["."]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [project.scripts]
 word_mcp_server = "word_document_server.main:run_server"

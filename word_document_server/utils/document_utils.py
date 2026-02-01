@@ -417,6 +417,63 @@ def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_
         return f"Failed to insert numbered list: {str(e)}"
 
 
+def replace_paragraph_range(doc_path: str, start_index: int, end_index: int,
+                            new_paragraphs: list, style: str = None) -> str:
+    """Replace paragraphs from start_index to end_index (inclusive) with new_paragraphs.
+
+    Args:
+        doc_path: Path to the document
+        start_index: First paragraph index to replace (inclusive)
+        end_index: Last paragraph index to replace (inclusive)
+        new_paragraphs: List of text strings for new paragraphs
+        style: Optional style name for new paragraphs (defaults to Normal)
+    """
+    import os
+    if not os.path.exists(doc_path):
+        return f"Document {doc_path} does not exist"
+
+    try:
+        doc = Document(doc_path)
+        total = len(doc.paragraphs)
+
+        if start_index < 0 or end_index >= total or start_index > end_index:
+            return f"Invalid range [{start_index}, {end_index}]. Document has {total} paragraphs (0-{total-1})."
+
+        # Get anchor element (paragraph before start_index)
+        if start_index > 0:
+            anchor_element = doc.paragraphs[start_index - 1]._element
+        else:
+            anchor_element = None
+
+        # Remove paragraphs in range (reverse to preserve indices)
+        for i in range(end_index, start_index - 1, -1):
+            p = doc.paragraphs[i]._p
+            p.getparent().remove(p)
+
+        # Insert new paragraphs
+        style_to_use = style or "Normal"
+        body = doc.element.body
+
+        prev_element = anchor_element
+        for text in new_paragraphs:
+            new_para = doc.add_paragraph(text, style=style_to_use)
+            new_p_element = new_para._element
+            # Remove from end of body (where add_paragraph appends it)
+            body.remove(new_p_element)
+            # Insert at correct position
+            if prev_element is not None:
+                prev_element.addnext(new_p_element)
+            else:
+                body.insert(0, new_p_element)
+            prev_element = new_p_element
+
+        doc.save(doc_path)
+        removed = end_index - start_index + 1
+        return f"Replaced {removed} paragraph(s) (indices {start_index}-{end_index}) with {len(new_paragraphs)} new paragraph(s)."
+    except Exception as e:
+        return f"Failed to replace paragraph range: {str(e)}"
+
+
 def is_toc_paragraph(para):
     """Devuelve True si el párrafo tiene un estilo de tabla de contenido (TOC)."""
     return para.style and para.style.name.upper().startswith("TOC")

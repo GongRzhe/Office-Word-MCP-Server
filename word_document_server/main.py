@@ -274,6 +274,17 @@ def register_tools():
     
     @mcp.tool(
         annotations=ToolAnnotations(
+            title="Replace Paragraph Range",
+            destructiveHint=True,
+        ),
+    )
+    def replace_paragraph_range(filename: str, start_index: int, end_index: int,
+                                new_paragraphs: list[str], style: str = None):
+        """Replace a range of paragraphs (start to end index inclusive) with new paragraphs in a single operation."""
+        return content_tools.replace_paragraph_range_tool(filename, start_index, end_index, new_paragraphs, style)
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
             title="Search and Replace",
             destructiveHint=True,
         ),
