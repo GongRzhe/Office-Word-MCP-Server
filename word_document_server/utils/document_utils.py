@@ -240,7 +240,20 @@ def insert_header_near_text(doc_path: str, target_text: str = None, header_title
         return f"Failed to insert header: {str(e)}"
 
 
-def insert_line_or_paragraph_near_text(doc_path: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None) -> str:
+def _copy_run_formatting(source_run, target_run):
+    """Copy character-level formatting from source run to target run."""
+    target_run.bold = source_run.bold
+    target_run.italic = source_run.italic
+    target_run.underline = source_run.underline
+    if source_run.font.name:
+        target_run.font.name = source_run.font.name
+    if source_run.font.size:
+        target_run.font.size = source_run.font.size
+    if source_run.font.color and source_run.font.color.rgb:
+        target_run.font.color.rgb = source_run.font.color.rgb
+
+
+def insert_line_or_paragraph_near_text(doc_path: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None, copy_style_from_index: int = None) -> str:
     """
     Insert a new line or paragraph (with specified or matched style) before or after the target paragraph.
     You can specify the target by text (first match) or by paragraph index.
@@ -282,6 +295,12 @@ def insert_line_or_paragraph_near_text(doc_path: str, target_text: str = None, l
         # Determine style: use provided or match target
         style = line_style if line_style else para.style
         new_para = doc.add_paragraph(line_text, style=style)
+        # Copy run formatting if requested
+        if copy_style_from_index is not None:
+            if 0 <= copy_style_from_index < len(doc.paragraphs):
+                source_para = doc.paragraphs[copy_style_from_index]
+                if source_para.runs and new_para.runs:
+                    _copy_run_formatting(source_para.runs[0], new_para.runs[0])
         if position == 'before':
             para._element.addprevious(new_para._element)
         else:

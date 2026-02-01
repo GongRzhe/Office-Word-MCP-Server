@@ -468,9 +468,9 @@ async def insert_numbered_list_near_text_tool(filename: str, target_text: str = 
     """Insert a bulleted or numbered list before or after the target paragraph. Specify by text or paragraph index."""
     return insert_numbered_list_near_text(filename, target_text, list_items, position, target_paragraph_index, bullet_type)
 
-async def insert_line_or_paragraph_near_text_tool(filename: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None) -> str:
+async def insert_line_or_paragraph_near_text_tool(filename: str, target_text: str = None, line_text: str = "", position: str = 'after', line_style: str = None, target_paragraph_index: int = None, copy_style_from_index: int = None) -> str:
     """Insert a new line or paragraph (with specified or matched style) before or after the target paragraph. Specify by text or paragraph index."""
-    return insert_line_or_paragraph_near_text(filename, target_text, line_text, position, line_style, target_paragraph_index)
+    return insert_line_or_paragraph_near_text(filename, target_text, line_text, position, line_style, target_paragraph_index, copy_style_from_index)
 
 async def replace_paragraph_block_below_header_tool(filename: str, header_text: str, new_paragraphs: list, detect_block_end_fn=None) -> str:
     """Reemplaza el bloque de párrafos debajo de un encabezado, evitando modificar TOC."""
