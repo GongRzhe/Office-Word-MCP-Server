@@ -2,12 +2,28 @@
 Document utility functions for Word Document Server.
 """
 import json
+import unicodedata
+import re
+import logging
 from typing import Dict, List, Any
 from docx import Document
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+
+logger = logging.getLogger(__name__)
+
+# Qualified tag names for XML element comparison
+_W_P = qn('w:p')
+_W_TBL = qn('w:tbl')
+
+
+def _normalize_text(s: str) -> str:
+    """Normalize text for reliable matching: NFKC normalize, collapse whitespace, strip."""
+    s = unicodedata.normalize("NFKC", s)
+    s = re.sub(r'\s+', ' ', s)
+    return s.strip()
 
 
 def get_document_properties(doc_path: str) -> Dict[str, Any]:
@@ -550,37 +566,59 @@ def replace_block_between_manual_anchors(
     elements = list(body)
     start_idx = None
     end_idx = None
-    # Find start anchor
+    # Find start anchor — Pass 1: exact normalized match
     for i, el in enumerate(elements):
-        if el.tag == CT_P.tag:
+        if el.tag == _W_P:
             p_text = "".join([node.text or '' for node in el.iter() if node.tag.endswith('}t')]).strip()
             if match_fn:
                 if match_fn(p_text, el):
                     start_idx = i
                     break
-            elif p_text == start_anchor_text.strip():
+            elif _normalize_text(p_text) == _normalize_text(start_anchor_text):
                 start_idx = i
                 break
+    # Pass 2: contains fallback
+    if start_idx is None and not match_fn:
+        normalized_start = _normalize_text(start_anchor_text)
+        for i, el in enumerate(elements):
+            if el.tag == _W_P:
+                p_text = "".join([node.text or '' for node in el.iter() if node.tag.endswith('}t')]).strip()
+                if normalized_start in _normalize_text(p_text):
+                    logger.info(f"Start anchor matched via contains: '{p_text}'")
+                    start_idx = i
+                    break
     if start_idx is None:
         return f"Start anchor '{start_anchor_text}' not found."
     # Find end anchor
     if end_anchor_text:
+        # Pass 1: exact normalized match
         for i in range(start_idx + 1, len(elements)):
             el = elements[i]
-            if el.tag == CT_P.tag:
+            if el.tag == _W_P:
                 p_text = "".join([node.text or '' for node in el.iter() if node.tag.endswith('}t')]).strip()
                 if match_fn:
                     if match_fn(p_text, el, is_end=True):
                         end_idx = i
                         break
-                elif p_text == end_anchor_text.strip():
+                elif _normalize_text(p_text) == _normalize_text(end_anchor_text):
                     end_idx = i
                     break
+        # Pass 2: contains fallback for end anchor
+        if end_idx is None and not match_fn:
+            normalized_end = _normalize_text(end_anchor_text)
+            for i in range(start_idx + 1, len(elements)):
+                el = elements[i]
+                if el.tag == _W_P:
+                    p_text = "".join([node.text or '' for node in el.iter() if node.tag.endswith('}t')]).strip()
+                    if normalized_end in _normalize_text(p_text):
+                        logger.info(f"End anchor matched via contains: '{p_text}'")
+                        end_idx = i
+                        break
     else:
         # Heuristic: next visually distinct paragraph (bold, all caps, or different font size), or end of document
         for i in range(start_idx + 1, len(elements)):
             el = elements[i]
-            if el.tag == CT_P.tag:
+            if el.tag == _W_P:
                 # Check for bold, all caps, or font size
                 runs = [node for node in el.iter() if node.tag.endswith('}r')]
                 for run in runs:
@@ -603,9 +641,16 @@ def replace_block_between_manual_anchors(
     paras = doc.paragraphs
     anchor_idx = None
     for i, para in enumerate(paras):
-        if para.text.strip() == start_anchor_text.strip():
+        if _normalize_text(para.text) == _normalize_text(start_anchor_text):
             anchor_idx = i
             break
+    # Contains fallback for re-find
+    if anchor_idx is None:
+        normalized_start = _normalize_text(start_anchor_text)
+        for i, para in enumerate(paras):
+            if normalized_start in _normalize_text(para.text):
+                anchor_idx = i
+                break
     if anchor_idx is None:
         return f"Start anchor '{start_anchor_text}' not found after deletion (unexpected)."
     anchor_para = paras[anchor_idx]
