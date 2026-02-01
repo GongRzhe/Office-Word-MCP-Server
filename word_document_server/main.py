@@ -274,6 +274,16 @@ def register_tools():
     
     @mcp.tool(
         annotations=ToolAnnotations(
+            title="Replace Paragraph Text",
+            destructiveHint=True,
+        ),
+    )
+    def replace_paragraph_text(filename: str, paragraph_index: int, new_text: str, preserve_style: bool = True):
+        """Replace the text of a specific paragraph by index, optionally preserving its style."""
+        return content_tools.replace_paragraph_text_tool(filename, paragraph_index, new_text, preserve_style)
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
             title="Search and Replace",
             destructiveHint=True,
         ),

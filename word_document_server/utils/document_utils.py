@@ -417,6 +417,41 @@ def insert_numbered_list_near_text(doc_path: str, target_text: str = None, list_
         return f"Failed to insert numbered list: {str(e)}"
 
 
+def replace_paragraph_text(doc_path: str, paragraph_index: int, new_text: str, preserve_style: bool = True) -> str:
+    """Replace the text of a paragraph at a given index, optionally preserving style."""
+    import os
+    if not os.path.exists(doc_path):
+        return f"Document {doc_path} does not exist"
+
+    try:
+        doc = Document(doc_path)
+        if paragraph_index < 0 or paragraph_index >= len(doc.paragraphs):
+            return f"Invalid paragraph index: {paragraph_index}. Document has {len(doc.paragraphs)} paragraphs."
+
+        para = doc.paragraphs[paragraph_index]
+        old_style = para.style
+
+        # Clear all runs
+        for run in para.runs:
+            run.text = ""
+
+        # Set text on first run (preserves its formatting) or add new run
+        if para.runs:
+            para.runs[0].text = new_text
+        else:
+            para.add_run(new_text)
+
+        if preserve_style and old_style:
+            para.style = old_style
+        elif not preserve_style:
+            para.style = doc.styles["Normal"]
+
+        doc.save(doc_path)
+        return f"Paragraph at index {paragraph_index} replaced successfully."
+    except Exception as e:
+        return f"Failed to replace paragraph: {str(e)}"
+
+
 def is_toc_paragraph(para):
     """Devuelve True si el párrafo tiene un estilo de tabla de contenido (TOC)."""
     return para.style and para.style.name.upper().startswith("TOC")
