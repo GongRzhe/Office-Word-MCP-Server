@@ -135,31 +135,75 @@ def find_paragraph_by_text(doc, text, partial_match=False):
     return matching_paragraphs
 
 
+def _replace_in_paragraph(para, old_text, new_text):
+    """Replace old_text with new_text in a paragraph, handling cross-run matches.
+
+    Returns the number of replacements made in this paragraph.
+    """
+    count = 0
+    while old_text in para.text:
+        full_text = para.text
+        start = full_text.find(old_text)
+        if start < 0:
+            break
+        end = start + len(old_text)
+
+        # Build character-to-run map
+        runs = para.runs
+        if not runs:
+            break
+        char_map = []  # (run_index, offset_in_run)
+        for ri, run in enumerate(runs):
+            for ci in range(len(run.text)):
+                char_map.append((ri, ci))
+
+        if end > len(char_map):
+            break
+
+        start_ri, start_ci = char_map[start]
+        end_ri, end_ci = char_map[end - 1]
+
+        if start_ri == end_ri:
+            # Single-run replacement
+            run = runs[start_ri]
+            run.text = run.text[:start_ci] + new_text + run.text[end_ci + 1:]
+        else:
+            # Multi-run replacement
+            # First run: keep prefix, add replacement text
+            runs[start_ri].text = runs[start_ri].text[:start_ci] + new_text
+            # Intermediate runs: clear
+            for ri in range(start_ri + 1, end_ri):
+                runs[ri].text = ""
+            # Last run: keep suffix after match
+            runs[end_ri].text = runs[end_ri].text[end_ci + 1:]
+
+        count += 1
+    return count
+
+
 def find_and_replace_text(doc, old_text, new_text):
     """
     Find and replace text throughout the document, skipping Table of Contents (TOC) paragraphs.
-    
+    Handles text that spans multiple XML runs within a paragraph.
+
     Args:
         doc: Document object
         old_text: Text to find
         new_text: Text to replace with
-        
+
     Returns:
         Number of replacements made
     """
     count = 0
-    
+
     # Search in paragraphs
     for para in doc.paragraphs:
         # Skip TOC paragraphs
         if para.style and para.style.name.startswith("TOC"):
             continue
         if old_text in para.text:
-            for run in para.runs:
-                if old_text in run.text:
-                    run.text = run.text.replace(old_text, new_text)
-                    count += 1
-    
+            count += _replace_in_paragraph(para, old_text, new_text)
+
     # Search in tables
     for table in doc.tables:
         for row in table.rows:
@@ -169,11 +213,8 @@ def find_and_replace_text(doc, old_text, new_text):
                     if para.style and para.style.name.startswith("TOC"):
                         continue
                     if old_text in para.text:
-                        for run in para.runs:
-                            if old_text in run.text:
-                                run.text = run.text.replace(old_text, new_text)
-                                count += 1
-    
+                        count += _replace_in_paragraph(para, old_text, new_text)
+
     return count
 
 
@@ -616,3 +657,38 @@ def replace_block_between_manual_anchors(
         anchor_para = new_para
     doc.save(doc_path)
     return f"Replaced content between '{start_anchor_text}' and '{end_anchor_text or 'next logical header'}' with {len(new_paragraphs)} paragraph(s), style: {style_to_use}, removed {len(to_remove)} elements."
+
+
+def replace_paragraph_text(doc_path: str, paragraph_index: int, new_text: str, preserve_style: bool = True) -> str:
+    """Replace the text of a paragraph at a given index, optionally preserving style."""
+    import os
+    if not os.path.exists(doc_path):
+        return f"Document {doc_path} does not exist"
+
+    try:
+        doc = Document(doc_path)
+        if paragraph_index < 0 or paragraph_index >= len(doc.paragraphs):
+            return f"Invalid paragraph index: {paragraph_index}. Document has {len(doc.paragraphs)} paragraphs."
+
+        para = doc.paragraphs[paragraph_index]
+        old_style = para.style
+
+        # Clear all runs
+        for run in para.runs:
+            run.text = ""
+
+        # Set text on first run (preserves its formatting) or add new run
+        if para.runs:
+            para.runs[0].text = new_text
+        else:
+            para.add_run(new_text)
+
+        if preserve_style and old_style:
+            para.style = old_style
+        elif not preserve_style:
+            para.style = doc.styles["Normal"]
+
+        doc.save(doc_path)
+        return f"Paragraph at index {paragraph_index} replaced successfully."
+    except Exception as e:
+        return f"Failed to replace paragraph: {str(e)}"
